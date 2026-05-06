@@ -1,7 +1,7 @@
 # Aka Curl - Akamai Edge Testing Tool
 Aka Curl is a cross-platform, graphical user interface (GUI) tool designed specifically for testing and troubleshooting Akamai CDN edge environments. It acts as an advanced wrapper around native OS commands (`curl` and `openssl`) to bypass common Python SSL/SNI limitations when spoofing IP addresses.
 
-## ✨ Features
+## Features
 * **Intelligent Edge Routing:** Recursively resolves CNAMEs up to 5 levels deep and routes requests to Staging or Production Edge environments based on your selection.
 * **Context-Aware Search:** Press `Ctrl+F` (or `Cmd+F` on macOS) to instantly search through lines of headers, JSON bodies, or certificate outputs with real-time highlighting.
 * **Native CURL Execution:** Uses your system's native `curl` to guarantee perfect SNI (Server Name Indication) handshakes and supports `HTTP/1.1`, `HTTP/2`, and `HTTP/3`.
@@ -16,9 +16,9 @@ ________________________________________________________________________________
 This guide covers the prerequisites and step-by-step installation instructions for getting **Aka Curl** running on macOS, Linux, and Windows.
 
 
-## 🚀 Installation Instructions by OS
+## Installation Instructions by OS
 
-### 🍎 macOS
+### macOS
 macOS is highly compatible, but Apple's default system Python can sometimes struggle with Tkinter (the required GUI framework). Using Homebrew is highly recommended to ensure a clean, crash-free setup.
 
 1. **Install Python via Homebrew:**
@@ -44,7 +44,7 @@ python3 akacurl.py
 
 ---
 
-### 🐧 Linux (Ubuntu/Debian)
+### Linux (Ubuntu/Debian)
 Linux systems usually have `curl` and `openssl` pre-installed, but you will likely need to explicitly install the Python Tkinter system library for the GUI to render.
 
 1. **Install System Dependencies:**
@@ -67,7 +67,7 @@ python3 akacurl.py
 
 ---
 
-### 🪟 Windows
+### Windows
 Windows 10 and 11 come with `curl.exe` pre-installed, but they **do not** include `openssl`. 
 
 1. **Install Python:** Download the official installer from [python.org](https://www.python.org/downloads/). 
@@ -92,7 +92,7 @@ python akacurl.py
 
 ---
 
-## 🛑 Troubleshooting
+## Troubleshooting
 
 ### Error: `externally-managed-environment` (macOS / Linux)
 If you try to run `pip install dnspython` and receive an error stating the environment is externally managed, this is a modern Python safety feature preventing global package installations. 
@@ -192,7 +192,7 @@ A highly valuable tab for sharing bugs with your team or Akamai support. It disp
 
 ---
 
-## 5. 🔍 Built-in Search (Context-Aware)
+## 5. Built-in Search (Context-Aware)
 
 Aka Curl features a context-aware search bar to help you dig through thousands of lines of output.
 
