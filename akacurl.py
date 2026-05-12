@@ -101,7 +101,7 @@ class AkaCurlApp:
         ttk.Label(input_frame, text="Custom Headers:\n(Comma or newline)", style="Cove.TLabel").grid(row=5, column=0, sticky=tk.NW, pady=4)
         self.headers_text = tk.Text(input_frame, height=6, width=70, **text_kwargs)
         self.headers_text.grid(row=5, column=1, columnspan=3, pady=4)
-        self.headers_text.insert("1.0", "Accept-Encoding: gzip\n")
+        #self.headers_text.insert("1.0", "Accept-Encoding: gzip\n")
 
         # Row 6: Payload Input (Height: 6)
         ttk.Label(input_frame, text="Payload:\n(POST/PUT)", style="Cove.TLabel").grid(row=6, column=0, sticky=tk.NW, pady=4)
