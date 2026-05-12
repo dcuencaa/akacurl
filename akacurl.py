@@ -1,9 +1,3 @@
-#----------------
-# Author: dcuencaa
-# version: 1.0
-# date: 04-22-2026
-#---------------- 
-
 import tkinter as tk
 from tkinter import ttk, scrolledtext, filedialog
 from urllib.parse import urlparse
@@ -19,7 +13,7 @@ class AkaCurlApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Aka Curl - Akamai Edge Testing Tool")
-        self.root.geometry("850x850")
+        self.root.geometry("850x950") # Slightly taller to accommodate the larger text boxes
 
         # --- Apply UX/UI Styling: "Cove" Palette ---
         self.style = ttk.Style(self.root)
@@ -45,20 +39,23 @@ class AkaCurlApp:
 
         self.create_widgets()
 
-        # Keyboard Bindings for Search
-        self.root.bind("<Control-f>", self.toggle_search_bar)
-        self.root.bind("<Command-f>", self.toggle_search_bar) # For macOS
+        # Keyboard Bindings for Search (Using bind_all so Text widgets don't intercept it)
+        self.root.bind_all("<Control-f>", self.toggle_search_bar)
+        self.root.bind_all("<Command-f>", self.toggle_search_bar) # For macOS
 
     def create_widgets(self):
         # --- Top Frame: Input Parameters (Cove Cream Area) ---
         input_frame = ttk.LabelFrame(self.root, text=" Request Settings ", padding=15, style="Cove.TLabelframe")
         input_frame.pack(fill=tk.X, padx=15, pady=10)
 
-        # Row 0: URL Input
-        ttk.Label(input_frame, text="Provide URL:", style="Cove.TLabel").grid(row=0, column=0, sticky=tk.W, pady=4)
-        self.url_entry = ttk.Entry(input_frame, width=70, font=("Helvetica", 10))
+        # Custom Text Widget styling for a cleaner look
+        text_kwargs = {"font": ("Courier", 10), "relief": "flat", "highlightthickness": 1, "highlightcolor": self.btn_light_blue, "highlightbackground": "#CCCCCC"}
+
+        # Row 0: URL Input (Height: 8)
+        ttk.Label(input_frame, text="Provide URL:", style="Cove.TLabel").grid(row=0, column=0, sticky=tk.NW, pady=4)
+        self.url_entry = tk.Text(input_frame, height=8, width=70, **text_kwargs)
         self.url_entry.grid(row=0, column=1, columnspan=3, sticky=tk.W, pady=4)
-        self.url_entry.insert(0, "https://www.example.com")
+        self.url_entry.insert("1.0", "https://www.example.com")
 
         # Row 1: Edge IP / Hostname Input
         ttk.Label(input_frame, text="Spoof IP / Hostname:", style="Cove.TLabel").grid(row=1, column=0, sticky=tk.W, pady=4)
@@ -100,18 +97,15 @@ class AkaCurlApp:
         self.ignore_cert_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(input_frame, text="Ignore Cert Errors (-k)", variable=self.ignore_cert_var, style="Cove.TCheckbutton").grid(row=4, column=2, columnspan=2, sticky=tk.W, pady=8)
 
-        # Custom Text Widget styling for a cleaner look
-        text_kwargs = {"font": ("Courier", 10), "relief": "flat", "highlightthickness": 1, "highlightcolor": self.btn_light_blue, "highlightbackground": "#CCCCCC"}
-
-        # Row 5: Custom Headers
+        # Row 5: Custom Headers (Height: 6)
         ttk.Label(input_frame, text="Custom Headers:\n(Comma or newline)", style="Cove.TLabel").grid(row=5, column=0, sticky=tk.NW, pady=4)
-        self.headers_text = tk.Text(input_frame, height=3, width=70, **text_kwargs)
+        self.headers_text = tk.Text(input_frame, height=6, width=70, **text_kwargs)
         self.headers_text.grid(row=5, column=1, columnspan=3, pady=4)
         self.headers_text.insert("1.0", "Accept-Encoding: gzip\n")
 
-        # Row 6: Payload Input
+        # Row 6: Payload Input (Height: 6)
         ttk.Label(input_frame, text="Payload:\n(POST/PUT)", style="Cove.TLabel").grid(row=6, column=0, sticky=tk.NW, pady=4)
-        self.payload_text = tk.Text(input_frame, height=3, width=70, **text_kwargs)
+        self.payload_text = tk.Text(input_frame, height=6, width=70, **text_kwargs)
         self.payload_text.grid(row=6, column=1, columnspan=3, pady=4)
 
         # Row 7: Submit Button
@@ -176,15 +170,14 @@ class AkaCurlApp:
 
         # --- Search Bar Frame (Hidden by Default) ---
         self.search_frame = ttk.Frame(output_frame)
-        # We will pack this dynamically when Ctrl+F is pressed
 
         ttk.Label(self.search_frame, text="Search:").pack(side=tk.LEFT, padx=(0, 5))
         self.search_var = tk.StringVar()
-        self.search_var.trace_add("write", self.perform_search) # Search as you type
+        self.search_var.trace_add("write", self.perform_search)
         self.search_entry = ttk.Entry(self.search_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side=tk.LEFT, padx=5)
-        self.search_entry.bind("<Return>", self.find_next) # Press Enter to go to next match
-        self.search_entry.bind("<Escape>", self.close_search_bar) # Press Esc to close
+        self.search_entry.bind("<Return>", self.find_next)
+        self.search_entry.bind("<Escape>", self.close_search_bar)
         
         ttk.Button(self.search_frame, text="Next", command=self.find_next, width=6).pack(side=tk.LEFT, padx=2)
         ttk.Button(self.search_frame, text="Close", command=self.close_search_bar, width=6).pack(side=tk.LEFT, padx=2)
@@ -193,33 +186,31 @@ class AkaCurlApp:
         self.current_match_index = -1
 
     def toggle_search_bar(self, event=None):
-        """Displays or hides the search bar."""
         if not self.search_frame.winfo_ismapped():
-            self.search_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(5, 0))
+            # FIXED: Added `before=self.notebook` to prevent the search bar from being crushed to 0 height
+            self.search_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(5, 0), before=self.notebook)
             self.search_entry.focus_set()
         else:
             self.search_entry.focus_set()
-            self.search_entry.selection_range(0, tk.END) # Select all text for easy replacement
+            self.search_entry.selection_range(0, tk.END)
+        return "break" # Prevents default Text widget behaviors from overriding the global shortcut
 
     def close_search_bar(self, event=None):
-        """Hides the search bar and clears highlights."""
         self.search_frame.pack_forget()
         self.clear_search_highlights()
+        return "break"
 
     def get_current_text_widget(self):
-        """Returns the text widget of the currently active tab."""
         current_tab_id = self.notebook.select()
         return self.tab_text_map.get(current_tab_id)
 
     def clear_search_highlights(self):
-        """Removes the yellow highlights from the active text widget."""
         text_widget = self.get_current_text_widget()
         if text_widget:
             text_widget.tag_remove('search', '1.0', tk.END)
             text_widget.tag_remove('search_active', '1.0', tk.END)
 
     def perform_search(self, *args):
-        """Searches the active tab for the query and highlights matches."""
         text_widget = self.get_current_text_widget()
         if not text_widget:
             return
@@ -245,12 +236,10 @@ class AkaCurlApp:
 
         text_widget.tag_config('search', background='yellow', foreground='black')
         
-        # Jump to first match
         if self.search_match_positions:
             self.find_next()
 
     def find_next(self, event=None):
-        """Jumps to the next match in the text widget."""
         if not self.search_match_positions:
             return
 
@@ -258,11 +247,9 @@ class AkaCurlApp:
         if not text_widget:
             return
 
-        # Move index forward, loop back to 0 if at the end
         self.current_match_index = (self.current_match_index + 1) % len(self.search_match_positions)
         match_start, match_end = self.search_match_positions[self.current_match_index]
 
-        # Highlight current active match slightly differently
         text_widget.tag_remove('search_active', '1.0', tk.END)
         text_widget.tag_add('search_active', match_start, match_end)
         text_widget.tag_config('search_active', background='orange', foreground='black')
@@ -270,7 +257,6 @@ class AkaCurlApp:
         text_widget.see(match_start)
 
     def get_akamai_cname(self, domain):
-        """Recursively resolves the CNAME of a domain up to 5 levels to find the Akamai edge hostname."""
         current_domain = domain
         akamai_domains = ['.edgekey.net', '.akamaiedge.net', '.edgesuite.net', '.akamaihd.net', '.akamai.net']
         
@@ -287,7 +273,6 @@ class AkaCurlApp:
         return None
 
     def enforce_env_suffix(self, host, is_staging):
-        """Forces the correct -staging suffix based purely on the UI toggle."""
         if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", host):
             return host
         
@@ -309,7 +294,7 @@ class AkaCurlApp:
         return host
 
     def send_request(self):
-        url = self.url_entry.get().strip()
+        url = self.url_entry.get("1.0", tk.END).strip()
         method = self.method_var.get()
         http_version = self.http_var.get()
         network_choice = self.network_var.get()
@@ -319,7 +304,6 @@ class AkaCurlApp:
         payload = self.payload_text.get("1.0", tk.END).strip()
         user_target = self.edge_ip_entry.get().strip()
 
-        # Clear UI & Search Highlights
         self.clear_search_highlights()
         self.response_text.delete("1.0", tk.END)
         self.body_text.delete("1.0", tk.END)
@@ -338,16 +322,13 @@ class AkaCurlApp:
 
         headers = {}
 
-        # 1. Parse Custom Headers
-        custom_hdrs_raw = self.headers_text.get("1.0", tk.END).strip()
-        if custom_hdrs_raw:
+        if custom_hdrs_raw := self.headers_text.get("1.0", tk.END).strip():
             hdrs_list = re.split(r'[\n,]', custom_hdrs_raw)
             for h in hdrs_list:
                 if ':' in h:
                     k, v = h.split(':', 1)
                     headers[k.strip()] = v.strip()
 
-        # 2. Inject Pragma Headers
         if use_pragma:
             headers['Pragma'] = (
                 "akamai-x-cache-on, akamai-x-cache-remote-on, "
@@ -356,7 +337,6 @@ class AkaCurlApp:
                 "akamai-x-get-true-cache-key, akamai-x-serial-no, akamai-x-get-request-id"
             )
 
-        # 3. Determine Initial Target Host
         target_host = user_target
         routing_method = "User Override"
 
@@ -376,10 +356,8 @@ class AkaCurlApp:
                 routing_method = "Default Map (No CNAME)"
                 target_host = "e19.dscg.akamaiedge.net" if is_essl else "a1.g.akamai.net"
 
-        # 4. Enforce the Staging/Production Suffix universally
         target_host = self.enforce_env_suffix(target_host, is_staging)
 
-        # 5. Resolve Target Host to IP for CURL
         try:
             target_ip = socket.gethostbyname(target_host)
             self.target_label.config(text=f"Routed to: {target_host} ({target_ip}) via {routing_method}")
@@ -390,7 +368,6 @@ class AkaCurlApp:
 
         port = "443" if parsed_url.scheme == "https" else "80"
 
-        # 6. Fetch and Decode OpenSSL Certificate
         if parsed_url.scheme == "https":
             try:
                 openssl_cmd = [
@@ -419,7 +396,6 @@ class AkaCurlApp:
 
         self.root.update()
 
-        # 7. Execute Native CURL Request
         body_file = tempfile.NamedTemporaryFile(delete=False).name
         curl_args = ["curl", "-s", "-D", "-", "-o", body_file, "-X", method]
         
@@ -478,12 +454,12 @@ class AkaCurlApp:
 
             if fetch_body:
                 content_type = headers_parsed.get('content-type', '').lower()
-                if any(t in content_type for t in ['text', 'json', 'xml', 'javascript', 'html']):
+                # Added 'mpegurl' and 'm3u8' to support text-based video playlists
+                if any(t in content_type for t in ['text', 'json', 'xml', 'javascript', 'html', 'mpegurl', 'm3u8']):
                     with open(body_file, 'r', encoding='utf-8', errors='replace') as f:
                         self.body_text.insert(tk.END, f.read())
                     self.notebook.select(self.tab_body)
                     
-                    # Re-run search instantly if the user left the search bar open from a previous query!
                     if self.search_frame.winfo_ismapped():
                         self.perform_search()
                 else:
